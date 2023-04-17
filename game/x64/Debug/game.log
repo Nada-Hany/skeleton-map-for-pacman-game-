@@ -1,0 +1,46 @@
+﻿  Source.cpp
+C:\programming\cpp\BFS sfml test\game\Source.cpp(48,2): warning C4091: 'typedef ': ignored on left of 'tile' when no variable is declared
+C:\programming\cpp\BFS sfml test\game\Source.cpp(52,13): warning C4326: return type of 'main' should be 'int' instead of 'void'
+C:\programming\cpp\BFS sfml test\game\Source.cpp(99,57): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
+C:\programming\cpp\BFS sfml test\game\Source.cpp(99,41): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
+C:\programming\cpp\BFS sfml test\game\Source.cpp(122,17): warning C4244: 'initializing': conversion from 'const T' to 'int', possible loss of data
+          with
+          [
+              T=float
+          ]
+C:\programming\cpp\BFS sfml test\game\Source.cpp(125,17): warning C4244: 'initializing': conversion from 'const T' to 'int', possible loss of data
+          with
+          [
+              T=float
+          ]
+C:\programming\cpp\BFS sfml test\game\Source.cpp(134,17): warning C4244: 'initializing': conversion from 'const T' to 'int', possible loss of data
+          with
+          [
+              T=float
+          ]
+C:\programming\cpp\BFS sfml test\game\Source.cpp(136,17): warning C4244: 'initializing': conversion from 'const T' to 'int', possible loss of data
+          with
+          [
+              T=float
+          ]
+C:\programming\cpp\BFS sfml test\game\Source.cpp(145,17): warning C4244: 'initializing': conversion from 'const T' to 'int', possible loss of data
+          with
+          [
+              T=float
+          ]
+C:\programming\cpp\BFS sfml test\game\Source.cpp(147,17): warning C4244: 'initializing': conversion from 'const T' to 'int', possible loss of data
+          with
+          [
+              T=float
+          ]
+C:\programming\cpp\BFS sfml test\game\Source.cpp(156,17): warning C4244: 'initializing': conversion from 'const T' to 'int', possible loss of data
+          with
+          [
+              T=float
+          ]
+C:\programming\cpp\BFS sfml test\game\Source.cpp(158,17): warning C4244: 'initializing': conversion from 'const T' to 'int', possible loss of data
+          with
+          [
+              T=float
+          ]
+  game.vcxproj -> C:\programming\cpp\BFS sfml test\x64\Debug\game.exe
