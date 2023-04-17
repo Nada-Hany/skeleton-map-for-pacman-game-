@@ -14,13 +14,13 @@
 const int diff = ((TILESIZE - player_width) / 2);
 #define NUMROW 15
 #define NUMCOL 15
-#define baseSpeed 4
+#define baseSpeed 1
 
 using namespace std;
 using namespace sf;
 
 enum class tile_type {
-	none, wall, start, target
+	none, wall, start, target, score 
 };
 
 int walls[NUMROW][NUMCOL] = {
@@ -52,11 +52,16 @@ typedef struct tile {
 };
 tile mp[NUMROW][NUMCOL];
 
+bool exist_in_closed(tile* current, vector<struct tile>& closed);
 
 //function returns the row and col of the corner 
 void get_tile_cor(float x, float y, int& row, int& col) {
 	col = (int)x / TILESIZE;
 	row = (int)y / TILESIZE;
+	//if ((int)x % 20 == 0)
+	//	col = ((int)x / TILESIZE) - 1;
+	//if ((int)y % 20 == 0)
+	//	row = ((int)y / TILESIZE) - 1;
 }
 
 //positive and negative diff in these functions exist since the player sprite
@@ -100,7 +105,7 @@ void move_left(Sprite& sprite) {
 	if (row_1 == row_2 && col_1 == col_2) condition_1 = true;
 
 	int row, col;
-	get_tile_cor(x - ((player_width / 2)) - baseSpeed - 0.001, y, row, col);
+	get_tile_cor(x - ((player_width / 2)) - baseSpeed - 0.001 - diff , y, row, col);
 
 	if (mp[row][col].type == tile_type::wall)
 	{
@@ -162,6 +167,102 @@ void move_down(Sprite& sprite) {
 		if (condition_1 && condition_2) sprite.move(0, baseSpeed);
 }
 
+ void move_to_target(vector <struct tile> get_path, Sprite& start) {
+	
+		for (int i = get_path.size(); i >= 0; i--) {
+			//right
+			int row, col;
+			float x = start.getPosition().x, y = start.getPosition().y;
+			get_tile_cor(x, y, row, col);
+			if (get_path[i].column > col) {
+				move_right(start);
+			}
+			//left
+			if (get_path[i].column <col) {
+				move_left(start);
+			}
+			//up
+			if (get_path[i].row < row) {
+				move_up(start);
+			}
+			//down
+			if (get_path[i].row > row) {
+				move_down(start);
+			}
+		}
+	}
+
+
+
+ void find_optimal_path(tile* current, tile* target, vector <tile>* get_path) {
+	 queue <tile> open;
+	 vector <tile> closed;
+	 open.push(*current);
+
+	 while (!open.empty()) {
+
+		 current = &mp[open.front().row][open.front().column];
+		 open.pop();
+
+		 if (current == target)
+			 break;
+
+		 if (current->column + 1 <= 2) {
+			 tile* right_tile = &mp[current->row][current->column + 1];
+			 if (right_tile->type != tile_type::wall)
+			 {
+				 bool check_right = exist_in_closed(right_tile, closed);
+				 if (!check_right) {
+					 open.push(*right_tile);
+					 right_tile->parent = &mp[current->row][current->column];
+				 }
+			 }
+		 }
+		 if (current->column - 1 >= 0) {
+			 tile* left_tile = &mp[current->row][current->column - 1];
+
+			 if (left_tile->type != tile_type::wall)
+			 {
+				 bool check_left = exist_in_closed(left_tile, closed);
+				 if (!check_left) {
+					 open.push(*left_tile);
+					 left_tile->parent = &mp[current->row][current->column];
+				 }
+			 }
+		 }
+		 if (current->row - 1 >= 0) {
+			 tile* up_tile = &mp[current->row - 1][current->column];
+			 if (up_tile->type != tile_type::wall)
+			 {
+				 bool check_up = exist_in_closed(up_tile, closed);
+				 if (!check_up) {
+					 open.push(*up_tile);
+					 up_tile->parent = &mp[current->row][current->column];
+				 }
+			 }
+		 }
+		 if (current->row + 1 <= 2) {
+			 tile* down_tile = &mp[current->row + 1][current->column];
+
+			 if (down_tile->type != tile_type::wall)
+			 {
+				 bool check_down = exist_in_closed(down_tile, closed);
+				 if (!check_down) {
+					 open.push(*down_tile);
+					 down_tile->parent = &mp[current->row][current->column];
+				 }
+			 }
+		 }
+		 closed.push_back(*current);
+	 }
+
+	 (*get_path).clear();
+	 while (current->parent != NULL) {
+		 (*get_path).push_back(*current);
+		 current = current->parent;
+	 }
+ }
+
 void main() {
 
 	RenderWindow window(VideoMode(WIDTH, HEIGH), "map test", Style::Default);
@@ -215,11 +316,15 @@ void main() {
 					mp[i][j].tile_sprite.setTexture(start);
 				}
 				if (walls[i][j] == 0) {
-					mp[i][j].type = tile_type::none;
+					mp[i][j].type = tile_type::score;
 					mp[i][j].tile_sprite.setTexture(none);
 					mp[i][j].dot.setRadius(5.0f);
 					mp[i][j].dot.setOrigin(5.0f, 5.0f);
-					mp[i][j].dot.setPosition((mp[i][j].column * 20 + TILESIZE / 2), (mp[i][j].row * 20 + TILESIZE / 2));
+					mp[i][j].dot.setPosition((mp[i][j].column * TILESIZE + TILESIZE / 2), (mp[i][j].row * TILESIZE + TILESIZE / 2));
+				}
+				if (walls[i][j] == 3) {
+					mp[i][j].type = tile_type::none;
+					mp[i][j].tile_sprite.setTexture(none);
 				}
 				//mp[i][j].tile_sprite.setOrigin(10, 10);
 				mp[i][j].tile_sprite.setPosition((j * TILESIZE), (i * TILESIZE));
@@ -270,12 +375,23 @@ void main() {
 				}
 			}
 		}
+		float x = player.getPosition().x, y = player.getPosition().y;
+
+		int row, col;
+		get_tile_cor(x, y, row, col);
+
+		if (mp[row][col].type == tile_type::score) {
+			if (mp[row][col].dot.getGlobalBounds().contains(player.getPosition().x, player.getPosition().y)) {
+				walls[row][col] = 3;
+			}
+		}
+
 		window.clear();
 
 		for (int i = 0; i < NUMROW; i++) {
 			for (int j = 0; j < NUMCOL; j++) {
 				window.draw(mp[i][j].tile_sprite);
-				if (mp[i][j].type == tile_type::none) {
+				if (mp[i][j].type == tile_type::score) {
 					window.draw(mp[i][j].dot);
 				}
 			}
@@ -285,4 +401,14 @@ void main() {
 		window.display();
 
 	}
+}
+
+bool exist_in_closed(tile* tile, vector <struct tile>& closed) {
+	bool ans = 0;
+	for (int i = 0; i < closed.size(); i++) {
+
+		if (tile->row == closed[i].row && tile->column == closed[i].column)
+			ans = 1;
+	}
+	return ans;
 }
