@@ -79,7 +79,7 @@ void move_right(Sprite& sprite) {
 
 	int row, col;
 
-	get_tile_cor(x + (player_width / 2) + baseSpeed, y, row, col);
+	get_tile_cor(x + (player_width / 2) + baseSpeed +0.0001 , y, row, col);
 	if (mp[row][col].type == tile_type::wall) {
 		if ((col * TILESIZE) - (x + (player_width / 2) + diff) > 0) {
 
@@ -105,7 +105,7 @@ void move_left(Sprite& sprite) {
 	if (row_1 == row_2 && col_1 == col_2) condition_1 = true;
 
 	int row, col;
-	get_tile_cor(x - ((player_width / 2)) - baseSpeed - 0.001 - diff , y, row, col);
+	get_tile_cor(x - ((player_width / 2)) - baseSpeed - 0.001 , y, row, col);
 
 	if (mp[row][col].type == tile_type::wall)
 	{
@@ -131,7 +131,7 @@ void move_up(Sprite& sprite) {
 
 	int row, col;
 
-	get_tile_cor(x, y - baseSpeed - (player_height / 2) - diff, row, col);
+	get_tile_cor(x, y - baseSpeed - (player_height / 2) - 0.001 , row, col);
 
 	if (mp[row][col].type == tile_type::wall) {
 		if (x, (y - (player_height / 2) - diff) - (row * TILESIZE + TILESIZE) > 0)
@@ -155,7 +155,7 @@ void move_down(Sprite& sprite) {
 
 	int row, col;
 
-	get_tile_cor(x, y + baseSpeed + (player_height / 2) + diff + 0.001, row, col);
+	get_tile_cor(x, y + baseSpeed + (player_height / 2) + 0.001, row, col);
 	if (mp[row][col].type == tile_type::wall) {
 
 		if ((row * TILESIZE) - (y + (player_height / 2) + diff) > 0)
