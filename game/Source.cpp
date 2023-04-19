@@ -14,7 +14,7 @@
 const int diff = ((TILESIZE - player_width) / 2);
 #define NUMROW 15
 #define NUMCOL 15
-#define baseSpeed 1
+#define baseSpeed 2
 
 using namespace std;
 using namespace sf;
@@ -26,7 +26,7 @@ enum class tile_type {
 int walls[NUMROW][NUMCOL] = {
 	{-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1},
 	{-1,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0, -1,  0,  0, -1},
-	{-1,  0, -1,  0, -1, -1, -1, -1, -1,  0,  1, -1,  0, -1, -1},
+	{-1,  0, -1,  0, -1, -1, -1, -1, -1,  0, -1, -1,  0, -1, -1},
 	{-1,  0, -1,  0,  0,  0,  0, -1,  0,  0, -1, -1,  0, -1, -1},
 	{-1,  0, -1,  0, -1, -1, -1, -1, -1,  0,  0,  0,  0,  0, -1},
 	{-1,  0, -1,  0,  0,  0,  0,  0,  0,  0, -1,  0, -1,  0, -1},
@@ -34,7 +34,7 @@ int walls[NUMROW][NUMCOL] = {
 	{-1,  0, -1,  0, -1,  0,  0,  0, -1,  0, -1,  0,  0,  0, -1},
 	{-1,  0,  0,  0, -1, -1, -1, -1, -1,  0,  0,  0, -1, -1, -1},
 	{-1,  0, -1,  0,  0,  0,  0,  0, -1,  0, -1,  0, -1,  0, -1},
-	{-1,  0, -1, -1, -1, -1,  2, -1, -1,  0, -1,  0, -1,  0, -1},
+	{-1,  0, -1, -1, -1, -1,  0, -1, -1,  0, -1,  0, -1,  0, -1},
 	{-1,  0,  0,  0,  0,  0,  0, -1,  0,  0, -1,  0,  0,  0, -1},
 	{-1, -1,  0, -1,  0, -1,  0, -1, -1,  0, -1, -1, -1,  0, -1},
 	{-1,  0,  0,  0,  0, -1,  0,  0,  0,  0,  0,  0, -1,  0, -1},
@@ -167,27 +167,31 @@ void move_down(Sprite& sprite) {
 		if (condition_1 && condition_2) sprite.move(0, baseSpeed);
 }
 
- void move_to_target(vector <struct tile> get_path, Sprite& start) {
+ void catch_target(vector <struct tile> get_path, Sprite& start) {
 	
-		for (int i = get_path.size(); i >= 0; i--) {
+		for (int i = get_path.size() - 1; i >= 0; i--) {
 			//right
 			int row, col;
 			float x = start.getPosition().x, y = start.getPosition().y;
 			get_tile_cor(x, y, row, col);
-			if (get_path[i].column > col) {
-				move_right(start);
-			}
-			//left
-			if (get_path[i].column <col) {
-				move_left(start);
-			}
-			//up
-			if (get_path[i].row < row) {
-				move_up(start);
-			}
-			//down
-			if (get_path[i].row > row) {
-				move_down(start);
+			while ((get_path[i].tile_sprite.getPosition().x-10 != start.getPosition().x) && (get_path[i].tile_sprite.getPosition().y != start.getPosition().y-10))
+			{
+				
+				if (get_path[i].column > col) {
+					move_right(start);
+				}
+				//left
+				if (get_path[i].column < col) {
+					move_left(start);
+				}
+				//up
+				if (get_path[i].row < row) {
+					move_up(start);
+				}
+				//down
+				if (get_path[i].row > row) {
+					move_down(start);
+				}
 			}
 		}
 	}
@@ -198,7 +202,6 @@ void move_down(Sprite& sprite) {
 	 queue <tile> open;
 	 vector <tile> closed;
 	 open.push(*current);
-
 	 while (!open.empty()) {
 
 		 current = &mp[open.front().row][open.front().column];
@@ -297,9 +300,20 @@ void main() {
 	// 1 for target
 	// 2 for start
 	// -1 for wall 
+	Sprite start_sprite;
+	start_sprite.setTexture(start);
+	start_sprite.setOrigin(9, 9);
+	start_sprite.setPosition(3 * TILESIZE + TILESIZE/2 ,5 * TILESIZE + TILESIZE/2);
+
+	Sprite sprite_target;
+	sprite_target.setTexture(target);
+	sprite_target.setOrigin(9, 9);
+	sprite_target.setPosition(TILESIZE + TILESIZE / 2, TILESIZE + TILESIZE / 2);
 
 	int keyPressed = -1;
 	while (window.isOpen()) {
+
+		
 
 		for (int i = 0; i < NUMROW; i++) {
 			for (int j = 0; j < NUMCOL; j++) {
@@ -307,14 +321,14 @@ void main() {
 					mp[i][j].type = tile_type::wall;
 					mp[i][j].tile_sprite.setTexture(wall);
 				}
-				else if (walls[i][j] == 1) {
+				/*else if (walls[i][j] == 1) {
 					mp[i][j].type = tile_type::target;
 					mp[i][j].tile_sprite.setTexture(target);
-				}
-				else if (walls[i][j] == 2) {
+				}*/
+				/*else if (walls[i][j] == 2) {
 					mp[i][j].type = tile_type::start;
 					mp[i][j].tile_sprite.setTexture(start);
-				}
+				}*/
 				if (walls[i][j] == 0) {
 					mp[i][j].type = tile_type::score;
 					mp[i][j].tile_sprite.setTexture(none);
@@ -333,7 +347,6 @@ void main() {
 			}
 		}
 
-		Time dt = clock.restart();
 		Event event;
 		while (window.pollEvent(event)) {
 			if (event.type == Event::Closed)
@@ -375,16 +388,31 @@ void main() {
 				}
 			}
 		}
-		float x = player.getPosition().x, y = player.getPosition().y;
-
+		float x_player = player.getPosition().x, y_player = player.getPosition().y;
 		int row, col;
-		get_tile_cor(x, y, row, col);
+		get_tile_cor(x_player ,y_player, row, col);
 
 		if (mp[row][col].type == tile_type::score) {
 			if (mp[row][col].dot.getGlobalBounds().contains(player.getPosition().x, player.getPosition().y)) {
 				walls[row][col] = 3;
 			}
 		}
+		float x_start = start_sprite.getPosition().x, y_start = start_sprite.getPosition().y;
+		int row_start, col_start;
+		get_tile_cor(x_start, y_start, row_start, col_start);
+
+		float x_target = sprite_target.getPosition().x, y_target = sprite_target.getPosition().y;
+		int row_target, col_target;
+		get_tile_cor(x_target, y_target, row_target, col_target);
+
+		tile* start_pointer = &mp[row_start][col_start];
+		tile* target_pointer = &mp[row_target][col_target];
+
+		vector <tile> get_path;
+
+		find_optimal_path(start_pointer, target_pointer, &get_path);
+
+		catch_target(get_path, start_sprite);
 
 		window.clear();
 
@@ -398,6 +426,8 @@ void main() {
 		}
 
 		window.draw(player);
+		window.draw(start_sprite);
+		window.draw(sprite_target);
 		window.display();
 
 	}
