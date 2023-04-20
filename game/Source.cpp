@@ -14,7 +14,7 @@
 const int diff = ((TILESIZE - player_width) / 2);
 #define NUMROW 15
 #define NUMCOL 15
-#define baseSpeed 2
+#define baseSpeed 0.5
 
 using namespace std;
 using namespace sf;
@@ -198,7 +198,7 @@ void move_down(Sprite& sprite , int& last_keyPressed) {
 			last_keyPressed = 4;
 		}
 		else
-			condition_2 = false, last_keyPressed = -1;
+			condition_2 = false;
 	}
 	else
 		if (condition_1 && condition_2) sprite.move(0, baseSpeed), last_keyPressed = 4;
@@ -208,35 +208,43 @@ void check_tiles(Sprite& sprite, int& keyPressed , int&lastKeyPressed , int row,
 	
 	//right
 	if (keyPressed == 1) {
-		if (mp[row][col + 1].type != tile_type::wall) {
-			if(same_tile_horz(sprite))
+		if (same_tile_horz(sprite))
+		{
+			if (mp[row][col + 1].type != tile_type::wall) {
 				lastKeyPressed = keyPressed;
-			//sprite.move(baseSpeed, 0);
+				//sprite.move(baseSpeed, 0);
+			}
 		}
 	}
 	//left
 	if (keyPressed == 2) {
-		if (mp[row][col - 1].type != tile_type::wall) {
-			if (same_tile_horz(sprite))
+		if (same_tile_horz(sprite))
+		{
+			if (mp[row][col - 1].type != tile_type::wall) {
 				lastKeyPressed = keyPressed;
-			//move_left(sprite, lastKeyPressed);
-			//sprite.move(- baseSpeed, 0);
+				//move_left(sprite, lastKeyPressed);
+				//sprite.move(- baseSpeed, 0);
+			}
 		}
 	}
 	//up
 	if (keyPressed == 3) {
-		if (mp[row - 1][col].type != tile_type::wall) {
-			if(same_tile_vert(sprite))
+		if (same_tile_vert(sprite))
+		{
+			if (mp[row - 1][col].type != tile_type::wall) {
 				lastKeyPressed = keyPressed;
-			//move_up(sprite, lastKeyPressed);
+				//move_up(sprite, lastKeyPressed);
+			}
 		}
 	}
 	//down
 	if (keyPressed == 4) {
-		if (mp[row + 1][col].type != tile_type::wall) {
-			if(same_tile_vert)
+		if (same_tile_vert(sprite))
+		{
+			if (mp[row + 1][col].type != tile_type::wall) {
 				lastKeyPressed = keyPressed;
-			//move_down(sprite, lastKeyPressed);
+				//move_down(sprite, lastKeyPressed);
+			}
 		}
 	}
 }
@@ -359,10 +367,6 @@ void main() {
 	float player_x = (2 * TILESIZE) - 10;
 	float plyaer_y = (NUMROW - 1) * TILESIZE - 10;
 
-	CircleShape scoreDot(5.0f);
-	scoreDot.setFillColor(Color::Yellow);
-	scoreDot.setOrigin(5, 5);
-
 	Sprite player;
 	player.setOrigin((9), (9));
 	player.setTexture(player_texture);
@@ -445,20 +449,6 @@ void main() {
 				keyPressed = 4;
 				//move_down(player , last_keyPressed);
 			}
-			/*if (event.type == Event::KeyReleased) {
-				if (event.key.code == Keyboard::Right) {
-					keyPressed = -1;
-				}
-				if (event.key.code == Keyboard::Left) {
-					keyPressed = -1;
-				}
-				if (event.key.code == Keyboard::Up) {
-					keyPressed = -1;
-				}
-				if (event.key.code == Keyboard::Down) {
-					keyPressed = -1;
-				}
-			}*/
 		}
 		//handling the movement 
 
@@ -466,7 +456,7 @@ void main() {
 		int row, col;
 		get_tile_cor(x_player, y_player, row, col);
 
-		//check_tiles(player, keyPressed, last_keyPressed , row ,col);
+		check_tiles(player, keyPressed, last_keyPressed , row ,col);
 
 		if (last_keyPressed == 1) {
 			move_right(player, last_keyPressed);
@@ -480,7 +470,7 @@ void main() {
 		if (last_keyPressed == 4) {
 			move_down(player, last_keyPressed);
 		}
-		check_tiles(player, keyPressed, last_keyPressed, row, col);
+		//check_tiles(player, keyPressed, last_keyPressed, row, col);
 
 		//last_keyPressed = get_lastKeyPressed();
 
