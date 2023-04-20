@@ -204,19 +204,41 @@ void move_down(Sprite& sprite , int& last_keyPressed) {
 		if (condition_1 && condition_2) sprite.move(0, baseSpeed), last_keyPressed = 4;
 }
 
-int get_lastKeyPressed() {
-	int lastKeyPressed = -1;
-
-	if (Keyboard::isKeyPressed(Keyboard::Right))
-		lastKeyPressed = 1;
-	if (Keyboard::isKeyPressed(Keyboard::Left))
-		lastKeyPressed = 2;
-	if (Keyboard::isKeyPressed(Keyboard::Up))
-		lastKeyPressed = 3;
-	if (Keyboard::isKeyPressed(Keyboard::Down))
-		lastKeyPressed = 4;
-
-	return lastKeyPressed;
+void check_tiles(Sprite& sprite, int& keyPressed , int&lastKeyPressed , int row, int col) {
+	
+	//right
+	if (keyPressed == 1) {
+		if (mp[row][col + 1].type != tile_type::wall) {
+			if(same_tile_horz(sprite))
+				lastKeyPressed = keyPressed;
+			//sprite.move(baseSpeed, 0);
+		}
+	}
+	//left
+	if (keyPressed == 2) {
+		if (mp[row][col - 1].type != tile_type::wall) {
+			if (same_tile_horz(sprite))
+				lastKeyPressed = keyPressed;
+			//move_left(sprite, lastKeyPressed);
+			//sprite.move(- baseSpeed, 0);
+		}
+	}
+	//up
+	if (keyPressed == 3) {
+		if (mp[row - 1][col].type != tile_type::wall) {
+			if(same_tile_vert(sprite))
+				lastKeyPressed = keyPressed;
+			//move_up(sprite, lastKeyPressed);
+		}
+	}
+	//down
+	if (keyPressed == 4) {
+		if (mp[row + 1][col].type != tile_type::wall) {
+			if(same_tile_vert)
+				lastKeyPressed = keyPressed;
+			//move_down(sprite, lastKeyPressed);
+		}
+	}
 }
 //
 //void catch_target(vector <struct tile> get_path, Sprite& start) {
@@ -318,9 +340,6 @@ void find_optimal_path(tile* current, tile* target, vector <tile>* get_path) {
 	 }
  }
 
- int keyPressed = -1;
- int last_keyPressed = -1;
-
 void main() {
 
 	RenderWindow window(VideoMode(WIDTH, HEIGH), "map test", Style::Default);
@@ -365,7 +384,8 @@ void main() {
 	sprite_target.setPosition(TILESIZE + TILESIZE / 2, TILESIZE + TILESIZE / 2);
 
 	int keyPressed = -1;
-	int last_keyPressed = -1;
+	int last_keyPressed = 1;
+
 	while (window.isOpen()) {
 
 		for (int i = 0; i < NUMROW; i++) {
@@ -409,23 +429,23 @@ void main() {
 			if (Keyboard::isKeyPressed(Keyboard::Escape))
 				window.close();
 
-			if ((Keyboard::isKeyPressed(Keyboard::Right) && (keyPressed== -1 || keyPressed == 1))) {
+			if ((Keyboard::isKeyPressed(Keyboard::Right) /*&& (keyPressed== -1 || keyPressed == 1)*/)) {
 				keyPressed = 1;
-				move_right(player , last_keyPressed);
+			//	move_right(player , last_keyPressed);
 			}
-			if ((Keyboard::isKeyPressed(Keyboard::Left) && (keyPressed == 2 || keyPressed == -1))) {
+			if ((Keyboard::isKeyPressed(Keyboard::Left) /*&& (keyPressed == 2 || keyPressed == -1)*/)) {
 				keyPressed = 2;
-				move_left(player , last_keyPressed);
+				//move_left(player , last_keyPressed);
 			}
-			if ((Keyboard::isKeyPressed(Keyboard::Up) && (keyPressed == 3 || keyPressed == -1))) {
+			if ((Keyboard::isKeyPressed(Keyboard::Up) /*&& (keyPressed == 3 || keyPressed == -1)*/)) {
 				keyPressed = 3;
-				move_up(player , last_keyPressed);
+				//move_up(player , last_keyPressed);
 			}
-			if ((Keyboard::isKeyPressed(Keyboard::Down) && (keyPressed == 4 || keyPressed == -1))) {
+			if ((Keyboard::isKeyPressed(Keyboard::Down) /*&& (keyPressed == 4 || keyPressed == -1)*/)) {
 				keyPressed = 4;
-				move_down(player , last_keyPressed);
+				//move_down(player , last_keyPressed);
 			}
-			if (event.type == Event::KeyReleased) {
+			/*if (event.type == Event::KeyReleased) {
 				if (event.key.code == Keyboard::Right) {
 					keyPressed = -1;
 				}
@@ -438,8 +458,16 @@ void main() {
 				if (event.key.code == Keyboard::Down) {
 					keyPressed = -1;
 				}
-			}
+			}*/
 		}
+		//handling the movement 
+
+		float x_player = player.getPosition().x, y_player = player.getPosition().y;
+		int row, col;
+		get_tile_cor(x_player, y_player, row, col);
+
+		//check_tiles(player, keyPressed, last_keyPressed , row ,col);
+
 		if (last_keyPressed == 1) {
 			move_right(player, last_keyPressed);
 		}
@@ -452,18 +480,16 @@ void main() {
 		if (last_keyPressed == 4) {
 			move_down(player, last_keyPressed);
 		}
+		check_tiles(player, keyPressed, last_keyPressed, row, col);
 
-		//handling the movement 
-		
 		//last_keyPressed = get_lastKeyPressed();
 
 		//is pacman moving ? -> KeyPressed -> any key 
-		//lastKeyPressed -> fist keyPressed that made him move -> won't change until the value in lastKeyPressed can work. 
+		//lastKeyPressed -> fist keyPressed that made him move -> won't change until the value in keyPressed can work. 
 
 
 		//Score 
-		float x_player = player.getPosition().x, y_player = player.getPosition().y;
-		int row, col;
+		
 		get_tile_cor(x_player ,y_player, row, col);
 
 		if (mp[row][col].type == tile_type::score) {
