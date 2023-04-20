@@ -52,9 +52,17 @@ typedef struct tile {
 };
 tile mp[NUMROW][NUMCOL];
 
-bool exist_in_closed(tile* current, vector<struct tile>& closed);
+bool exist_in_closed(tile* tile, vector <struct tile>& closed) {
+	bool ans = 0;
+	for (int i = 0; i < closed.size(); i++) {
 
-//function returns the row and col of the corner 
+		if (tile->row == closed[i].row && tile->column == closed[i].column)
+			ans = 1;
+	}
+	return ans;
+}
+
+//function returns the row and col of the tile  
 void get_tile_cor(float x, float y, int& row, int& col) {
 	col = (int)x / TILESIZE;
 	row = (int)y / TILESIZE;
@@ -64,18 +72,39 @@ void get_tile_cor(float x, float y, int& row, int& col) {
 	//	row = ((int)y / TILESIZE) - 1;
 }
 
-//positive and negative diff in these functions exist since the player sprite
-//is not the same pixel size in width and height as the tile so i want to leave an equal distance
-//between the wall and the player while colliding.
-void move_right(Sprite& sprite) {
+bool same_tile_horz(Sprite& sprite) {
+	bool condition_1 = false;
 	float y = sprite.getPosition().y, x = sprite.getPosition().x;
-	bool condition_1 = false, condition_2 = true;
-
 	int row_1, row_2, col_1, col_2;
 	get_tile_cor(x + (player_width / 2), y - (player_height / 2), row_1, col_1);
 	get_tile_cor(x + (player_width / 2), y + (player_height / 2), row_2, col_2);
 
-	if (row_1 == row_2 && col_1 == col_2) condition_1 = true;
+	if (row_1 == row_2 && col_1 == col_2)
+		condition_1 = true;
+
+	return condition_1;
+}
+bool same_tile_vert(Sprite& sprite) {
+	float y = sprite.getPosition().y, x = sprite.getPosition().x;
+	bool condition_1 = false;
+	int row_1, row_2, col_1, col_2;
+	get_tile_cor(x - (player_width / 2), y - (player_height / 2), row_1, col_1);
+	get_tile_cor(x + (player_width / 2), y - (player_height / 2), row_2, col_2);
+	if (row_1 == row_2 && col_1 == col_2)
+		condition_1 = true;
+
+	return condition_1;
+}
+
+//positive and negative diff in these functions exist since the player sprite
+//is not the same pixel size in width and height as the tile so i want to leave an equal distance
+//between the wall and the player while colliding.
+
+void move_right(Sprite& sprite, int& lastKeyPressed) {
+	float y = sprite.getPosition().y, x = sprite.getPosition().x;
+	bool condition_1 = false, condition_2 = true;
+
+	condition_1 = same_tile_horz(sprite);
 
 	int row, col;
 
@@ -84,25 +113,28 @@ void move_right(Sprite& sprite) {
 		if ((col * TILESIZE) - (x + (player_width / 2) + diff) > 0) {
 
 			if (condition_1 && condition_2)
+			{
 				sprite.move((col * TILESIZE) - (x - (player_width / 2)), 0);
+				lastKeyPressed = 1;
+			}
 		}
 		else {
-			condition_2 = false;
+			condition_2 = false, lastKeyPressed = -1;
 		}
 	}
 	else {
-		if (condition_1 && condition_2) sprite.move(baseSpeed, 0);
+		if (condition_1 && condition_2) 
+		{
+			sprite.move(baseSpeed, 0);
+			lastKeyPressed = 1;
+		}
 	}
 }
-void move_left(Sprite& sprite) {
+void move_left(Sprite& sprite ,int & last_keyPressed) {
 	float y = sprite.getPosition().y, x = sprite.getPosition().x;
 	bool condition_1 = false, condition_2 = true;
 
-	int row_1, row_2, col_1, col_2;
-	get_tile_cor(x - (player_width / 2), y - (player_height / 2), row_1, col_1);
-	get_tile_cor(x - (player_width / 2), y + (player_height / 2), row_2, col_2);
-
-	if (row_1 == row_2 && col_1 == col_2) condition_1 = true;
+	condition_1 = same_tile_horz(sprite);
 
 	int row, col;
 	get_tile_cor(x - ((player_width / 2)) - baseSpeed - 0.001 , y, row, col);
@@ -110,48 +142,50 @@ void move_left(Sprite& sprite) {
 	if (mp[row][col].type == tile_type::wall)
 	{
 		if ((x - (player_width / 2) - diff) - ((col * TILESIZE) + TILESIZE) > 0)
-			sprite.move(-((x - (player_width / 2)) - ((col * TILESIZE) + TILESIZE)), 0);
+		{
+			sprite.move(-((x - (player_width / 2)) - ((col * TILESIZE) + TILESIZE)), 0); 
+			last_keyPressed = 2;
+		}
 		else
-			condition_2 = false;
+		{
+			condition_2 = false , last_keyPressed = -1;
+		}
 	}
 
 	else {
-		if (condition_1 && condition_2) sprite.move(-baseSpeed, 0);
+		if (condition_1 && condition_2) {
+			sprite.move(-baseSpeed, 0);
+			last_keyPressed = 2;
+		}
 	}
 }
-void move_up(Sprite& sprite) {
+void move_up(Sprite& sprite , int & last_keyPressed) {
 	float y = sprite.getPosition().y, x = sprite.getPosition().x;
 	bool condition_1 = false, condition_2 = true;
 
-	int row_1, row_2, col_1, col_2;
-	get_tile_cor(x - (player_width / 2), y - (player_height / 2), row_1, col_1);
-	get_tile_cor(x + (player_width / 2), y - (player_height / 2), row_2, col_2);
-
-	if (row_1 == row_2 && col_1 == col_2) condition_1 = true;
+	condition_1 = same_tile_vert(sprite);
 
 	int row, col;
 
 	get_tile_cor(x, y - baseSpeed - (player_height / 2) - 0.001 , row, col);
 
 	if (mp[row][col].type == tile_type::wall) {
-		if (x, (y - (player_height / 2) - diff) - (row * TILESIZE + TILESIZE) > 0)
+		if (x, (y - (player_height / 2) - diff) - (row * TILESIZE + TILESIZE) > 0) {
 			sprite.move(0, -((y - (player_height / 2) - diff) - (row * TILESIZE + TILESIZE)));
+			last_keyPressed = 3;
+		}
 		else
-			condition_2 = false;
+			condition_2 = false, last_keyPressed = -1;
 	}
 	else
 		if (condition_1 && condition_2)
-			sprite.move(0, -baseSpeed);
+			sprite.move(0, -baseSpeed), last_keyPressed = 3;
 }
-void move_down(Sprite& sprite) {
+void move_down(Sprite& sprite , int& last_keyPressed) {
 	float y = sprite.getPosition().y, x = sprite.getPosition().x;
 	bool condition_1 = false, condition_2 = true;
 
-	int row_1, row_2, col_1, col_2;
-	get_tile_cor(x - (player_width / 2), y + (player_height / 2), row_1, col_1);
-	get_tile_cor(x + (player_width / 2), y + (player_height / 2), row_2, col_2);
-
-	if (row_1 == row_2 && col_1 == col_2) condition_1 = true;
+	condition_1 = same_tile_vert(sprite);
 
 	int row, col;
 
@@ -159,46 +193,64 @@ void move_down(Sprite& sprite) {
 	if (mp[row][col].type == tile_type::wall) {
 
 		if ((row * TILESIZE) - (y + (player_height / 2) + diff) > 0)
+		{
 			sprite.move(0, (row * TILESIZE) - (y + (player_height / 2) + diff));
+			last_keyPressed = 4;
+		}
 		else
-			condition_2 = false;
+			condition_2 = false, last_keyPressed = -1;
 	}
 	else
-		if (condition_1 && condition_2) sprite.move(0, baseSpeed);
+		if (condition_1 && condition_2) sprite.move(0, baseSpeed), last_keyPressed = 4;
 }
 
- void catch_target(vector <struct tile> get_path, Sprite& start) {
-	
-		for (int i = get_path.size() - 1; i >= 0; i--) {
-			//right
-			int row, col;
-			float x = start.getPosition().x, y = start.getPosition().y;
-			get_tile_cor(x, y, row, col);
-			while ((get_path[i].tile_sprite.getPosition().x-10 != start.getPosition().x) && (get_path[i].tile_sprite.getPosition().y != start.getPosition().y-10))
-			{
-				
-				if (get_path[i].column > col) {
-					move_right(start);
-				}
-				//left
-				if (get_path[i].column < col) {
-					move_left(start);
-				}
-				//up
-				if (get_path[i].row < row) {
-					move_up(start);
-				}
-				//down
-				if (get_path[i].row > row) {
-					move_down(start);
-				}
-			}
-		}
-	}
+int get_lastKeyPressed() {
+	int lastKeyPressed = -1;
+
+	if (Keyboard::isKeyPressed(Keyboard::Right))
+		lastKeyPressed = 1;
+	if (Keyboard::isKeyPressed(Keyboard::Left))
+		lastKeyPressed = 2;
+	if (Keyboard::isKeyPressed(Keyboard::Up))
+		lastKeyPressed = 3;
+	if (Keyboard::isKeyPressed(Keyboard::Down))
+		lastKeyPressed = 4;
+
+	return lastKeyPressed;
+}
+//
+//void catch_target(vector <struct tile> get_path, Sprite& start) {
+//	
+//		for (int i = get_path.size() - 1; i >= 0; i--) {
+//			//right
+//			int row, col;
+//			float x = start.getPosition().x, y = start.getPosition().y;
+//			get_tile_cor(x, y, row, col);
+//			while ((get_path[i].tile_sprite.getPosition().x-10 != start.getPosition().x) && (get_path[i].tile_sprite.getPosition().y != start.getPosition().y-10))
+//			{
+//				
+//				if (get_path[i].column > col) {
+//					move_right(start);
+//				}
+//				//left
+//				if (get_path[i].column < col) {
+//					move_left(start);
+//				}
+//				//up
+//				if (get_path[i].row < row) {
+//					move_up(start);
+//				}
+//				//down
+//				if (get_path[i].row > row) {
+//					move_down(start);
+//				}
+//			}
+//		}
+//	}
+//
 
 
-
- void find_optimal_path(tile* current, tile* target, vector <tile>* get_path) {
+void find_optimal_path(tile* current, tile* target, vector <tile>* get_path) {
 	 queue <tile> open;
 	 vector <tile> closed;
 	 open.push(*current);
@@ -266,6 +318,9 @@ void move_down(Sprite& sprite) {
 	 }
  }
 
+ int keyPressed = -1;
+ int last_keyPressed = -1;
+
 void main() {
 
 	RenderWindow window(VideoMode(WIDTH, HEIGH), "map test", Style::Default);
@@ -289,7 +344,6 @@ void main() {
 	scoreDot.setFillColor(Color::Yellow);
 	scoreDot.setOrigin(5, 5);
 
-	Clock clock;
 	Sprite player;
 	player.setOrigin((9), (9));
 	player.setTexture(player_texture);
@@ -311,9 +365,8 @@ void main() {
 	sprite_target.setPosition(TILESIZE + TILESIZE / 2, TILESIZE + TILESIZE / 2);
 
 	int keyPressed = -1;
+	int last_keyPressed = -1;
 	while (window.isOpen()) {
-
-		
 
 		for (int i = 0; i < NUMROW; i++) {
 			for (int j = 0; j < NUMCOL; j++) {
@@ -348,31 +401,30 @@ void main() {
 		}
 
 		Event event;
+
 		while (window.pollEvent(event)) {
 			if (event.type == Event::Closed)
 				window.close();
+
 			if (Keyboard::isKeyPressed(Keyboard::Escape))
-			{
 				window.close();
-			}
 
-			if (Keyboard::isKeyPressed(Keyboard::Right) && (keyPressed == 1 || keyPressed == -1)) {
+			if ((Keyboard::isKeyPressed(Keyboard::Right) && (keyPressed== -1 || keyPressed == 1))) {
 				keyPressed = 1;
-				move_right(player);
+				move_right(player , last_keyPressed);
 			}
-			if (Keyboard::isKeyPressed(Keyboard::Left) && (keyPressed == 2 || keyPressed == -1)) {
+			if ((Keyboard::isKeyPressed(Keyboard::Left) && (keyPressed == 2 || keyPressed == -1))) {
 				keyPressed = 2;
-				move_left(player);
+				move_left(player , last_keyPressed);
 			}
-			if (Keyboard::isKeyPressed(Keyboard::Up) && (keyPressed == 3 || keyPressed == -1)) {
+			if ((Keyboard::isKeyPressed(Keyboard::Up) && (keyPressed == 3 || keyPressed == -1))) {
 				keyPressed = 3;
-				move_up(player);
+				move_up(player , last_keyPressed);
 			}
-			if (Keyboard::isKeyPressed(Keyboard::Down) && (keyPressed == 4 || keyPressed == -1)) {
+			if ((Keyboard::isKeyPressed(Keyboard::Down) && (keyPressed == 4 || keyPressed == -1))) {
 				keyPressed = 4;
-				move_down(player);
+				move_down(player , last_keyPressed);
 			}
-
 			if (event.type == Event::KeyReleased) {
 				if (event.key.code == Keyboard::Right) {
 					keyPressed = -1;
@@ -388,6 +440,28 @@ void main() {
 				}
 			}
 		}
+		if (last_keyPressed == 1) {
+			move_right(player, last_keyPressed);
+		}
+		if (last_keyPressed == 2) {
+			move_left(player, last_keyPressed);
+		}
+		if (last_keyPressed == 3) {
+			move_up(player, last_keyPressed);
+		}
+		if (last_keyPressed == 4) {
+			move_down(player, last_keyPressed);
+		}
+
+		//handling the movement 
+		
+		//last_keyPressed = get_lastKeyPressed();
+
+		//is pacman moving ? -> KeyPressed -> any key 
+		//lastKeyPressed -> fist keyPressed that made him move -> won't change until the value in lastKeyPressed can work. 
+
+
+		//Score 
 		float x_player = player.getPosition().x, y_player = player.getPosition().y;
 		int row, col;
 		get_tile_cor(x_player ,y_player, row, col);
@@ -397,6 +471,8 @@ void main() {
 				walls[row][col] = 3;
 			}
 		}
+
+		//BFS 
 		float x_start = start_sprite.getPosition().x, y_start = start_sprite.getPosition().y;
 		int row_start, col_start;
 		get_tile_cor(x_start, y_start, row_start, col_start);
@@ -410,9 +486,9 @@ void main() {
 
 		vector <tile> get_path;
 
-		find_optimal_path(start_pointer, target_pointer, &get_path);
+		//find_optimal_path(start_pointer, target_pointer, &get_path);
 
-		catch_target(get_path, start_sprite);
+		//catch_target(get_path, start_sprite);
 
 		window.clear();
 
@@ -433,12 +509,4 @@ void main() {
 	}
 }
 
-bool exist_in_closed(tile* tile, vector <struct tile>& closed) {
-	bool ans = 0;
-	for (int i = 0; i < closed.size(); i++) {
 
-		if (tile->row == closed[i].row && tile->column == closed[i].column)
-			ans = 1;
-	}
-	return ans;
-}
