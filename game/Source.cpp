@@ -4,7 +4,7 @@
 #include <queue>
 #include <cmath>
 
-#define WIDTH 300
+#define WIDTH 400
 #define HEIGH 300
 #define TILESIZE 20
 #define	Y_OFFSET 0
@@ -14,7 +14,7 @@
 const int diff = ((TILESIZE - player_width) / 2);
 #define NUMROW 15
 #define NUMCOL 15
-#define baseSpeed 0.5
+#define baseSpeed 2
 
 using namespace std;
 using namespace sf;
@@ -137,6 +137,8 @@ void move_left(Sprite& sprite ,int & last_keyPressed) {
 	condition_1 = same_tile_horz(sprite);
 
 	int row, col;
+
+
 	get_tile_cor(x - ((player_width / 2)) - baseSpeed - 0.001 , y, row, col);
 
 	if (mp[row][col].type == tile_type::wall)
@@ -279,80 +281,96 @@ void check_tiles(Sprite& sprite, int& keyPressed , int&lastKeyPressed , int row,
 //	}
 //
 
-
 void find_optimal_path(tile* current, tile* target, vector <tile>* get_path) {
-	 queue <tile> open;
-	 vector <tile> closed;
-	 open.push(*current);
-	 while (!open.empty()) {
+	queue <tile> open;
+	vector <tile> closed;
+	open.push(*current);
 
-		 current = &mp[open.front().row][open.front().column];
-		 open.pop();
+	while (!open.empty()) {
 
-		 if (current == target)
-			 break;
+		current = &mp[open.front().row][open.front().column];
+		open.pop();
 
-		 if (current->column + 1 <= 2) {
-			 tile* right_tile = &mp[current->row][current->column + 1];
-			 if (right_tile->type != tile_type::wall)
-			 {
-				 bool check_right = exist_in_closed(right_tile, closed);
-				 if (!check_right) {
-					 open.push(*right_tile);
-					 right_tile->parent = &mp[current->row][current->column];
-				 }
-			 }
-		 }
-		 if (current->column - 1 >= 0) {
-			 tile* left_tile = &mp[current->row][current->column - 1];
+		if (current == target)
+			break;
 
-			 if (left_tile->type != tile_type::wall)
-			 {
-				 bool check_left = exist_in_closed(left_tile, closed);
-				 if (!check_left) {
-					 open.push(*left_tile);
-					 left_tile->parent = &mp[current->row][current->column];
-				 }
-			 }
-		 }
-		 if (current->row - 1 >= 0) {
-			 tile* up_tile = &mp[current->row - 1][current->column];
-			 if (up_tile->type != tile_type::wall)
-			 {
-				 bool check_up = exist_in_closed(up_tile, closed);
-				 if (!check_up) {
-					 open.push(*up_tile);
-					 up_tile->parent = &mp[current->row][current->column];
-				 }
-			 }
-		 }
-		 if (current->row + 1 <= 2) {
-			 tile* down_tile = &mp[current->row + 1][current->column];
+		if (current->column + 1 <= 2) {
+			tile* right_tile = &mp[current->row][current->column + 1];
+			if (right_tile->type != tile_type::wall)
+			{
+				bool check_right = exist_in_closed(right_tile, closed);
+				if (!check_right) {
+					open.push(*right_tile);
+					right_tile->parent = &mp[current->row][current->column];
+				}
+			}
+		}
+		if (current->column - 1 >= 0) {
+			tile* left_tile = &mp[current->row][current->column - 1];
 
-			 if (down_tile->type != tile_type::wall)
-			 {
-				 bool check_down = exist_in_closed(down_tile, closed);
-				 if (!check_down) {
-					 open.push(*down_tile);
-					 down_tile->parent = &mp[current->row][current->column];
-				 }
-			 }
-		 }
-		 closed.push_back(*current);
-	 }
+			if (left_tile->type != tile_type::wall)
+			{
+				bool check_left = exist_in_closed(left_tile, closed);
+				if (!check_left) {
+					open.push(*left_tile);
+					left_tile->parent = &mp[current->row][current->column];
+				}
+			}
+		}
+		if (current->row - 1 >= 0) {
+			tile* up_tile = &mp[current->row - 1][current->column];
+			if (up_tile->type != tile_type::wall)
+			{
+				bool check_up = exist_in_closed(up_tile, closed);
+				if (!check_up) {
+					open.push(*up_tile);
+					up_tile->parent = &mp[current->row][current->column];
+				}
+			}
+		}
+		if (current->row + 1 <= 2) {
+			tile* down_tile = &mp[current->row + 1][current->column];
 
-	 (*get_path).clear();
-	 while (current->parent != NULL) {
-		 (*get_path).push_back(*current);
-		 current = current->parent;
-	 }
- }
+			if (down_tile->type != tile_type::wall)
+			{
+				bool check_down = exist_in_closed(down_tile, closed);
+				if (!check_down) {
+					open.push(*down_tile);
+					down_tile->parent = &mp[current->row][current->column];
+				}
+			}
+		}
+		closed.push_back(*current);
+	}
 
+	(*get_path).clear();
+	while (current->parent != NULL) {
+		(*get_path).push_back(*current);
+		current = current->parent;
+	}
+}
+
+const int ghosts_number = 1;
+struct ghoust {
+
+	
+	Sprite sprite;
+	int algo_window;
+	float speed;
+	int frames_per_tile;
+	int step_counts;
+	vector<tile> shortest_path;
+	int shortest_path_index;
+	int moving_direction;
+	int num_tiles_past;
+
+}ghosts[ghosts_number];
 void main() {
 
 	RenderWindow window(VideoMode(WIDTH, HEIGH), "map test", Style::Default);
 	window.setFramerateLimit(60);
-
+	Texture ghost_texture;
+	ghost_texture.loadFromFile("C:/programming/cpp/BFS sfml test/target.png");
 	Texture target;
 	target.loadFromFile("C:/programming/cpp/BFS sfml test/target.png");
 	Texture wall;
@@ -387,8 +405,21 @@ void main() {
 	sprite_target.setOrigin(9, 9);
 	sprite_target.setPosition(TILESIZE + TILESIZE / 2, TILESIZE + TILESIZE / 2);
 
+
+
 	int keyPressed = -1;
 	int last_keyPressed = 1;
+
+
+	ghosts[0].sprite.setTexture(ghost_texture);
+	ghosts[0].algo_window = 7;
+	ghosts[0].num_tiles_past = 7;
+	ghosts[0].speed = 2;
+	ghosts[0].frames_per_tile = TILESIZE / ghosts[0].speed;
+	ghosts[0].step_counts = 0;
+	ghosts[0].sprite.setOrigin(9, 9);
+	ghosts[0].sprite.setPosition(30, 30);
+
 
 	while (window.isOpen()) {
 
@@ -417,7 +448,6 @@ void main() {
 					mp[i][j].type = tile_type::none;
 					mp[i][j].tile_sprite.setTexture(none);
 				}
-				//mp[i][j].tile_sprite.setOrigin(10, 10);
 				mp[i][j].tile_sprite.setPosition((j * TILESIZE), (i * TILESIZE));
 				mp[i][j].row = i;
 				mp[i][j].column = j;
@@ -433,22 +463,17 @@ void main() {
 			if (Keyboard::isKeyPressed(Keyboard::Escape))
 				window.close();
 
-			if ((Keyboard::isKeyPressed(Keyboard::Right) /*&& (keyPressed== -1 || keyPressed == 1)*/)) {
+			if (Keyboard::isKeyPressed(Keyboard::Right)) 
 				keyPressed = 1;
-			//	move_right(player , last_keyPressed);
-			}
-			if ((Keyboard::isKeyPressed(Keyboard::Left) /*&& (keyPressed == 2 || keyPressed == -1)*/)) {
+
+			if (Keyboard::isKeyPressed(Keyboard::Left))
 				keyPressed = 2;
-				//move_left(player , last_keyPressed);
-			}
-			if ((Keyboard::isKeyPressed(Keyboard::Up) /*&& (keyPressed == 3 || keyPressed == -1)*/)) {
+
+			if (Keyboard::isKeyPressed(Keyboard::Up)) 
 				keyPressed = 3;
-				//move_up(player , last_keyPressed);
-			}
-			if ((Keyboard::isKeyPressed(Keyboard::Down) /*&& (keyPressed == 4 || keyPressed == -1)*/)) {
+
+			if (Keyboard::isKeyPressed(Keyboard::Down)) 
 				keyPressed = 4;
-				//move_down(player , last_keyPressed);
-			}
 		}
 		//handling the movement 
 
@@ -470,13 +495,6 @@ void main() {
 		if (last_keyPressed == 4) {
 			move_down(player, last_keyPressed);
 		}
-		//check_tiles(player, keyPressed, last_keyPressed, row, col);
-
-		//last_keyPressed = get_lastKeyPressed();
-
-		//is pacman moving ? -> KeyPressed -> any key 
-		//lastKeyPressed -> fist keyPressed that made him move -> won't change until the value in keyPressed can work. 
-
 
 		//Score 
 		
@@ -497,10 +515,54 @@ void main() {
 		int row_target, col_target;
 		get_tile_cor(x_target, y_target, row_target, col_target);
 
-		tile* start_pointer = &mp[row_start][col_start];
-		tile* target_pointer = &mp[row_target][col_target];
 
-		vector <tile> get_path;
+		for (int i = 0; i < ghosts_number; i++) {
+
+			if (ghosts[i].step_counts % ghosts[i].frames_per_tile == 0 ) {
+
+
+				if (ghosts[i].num_tiles_past == ghosts[i].algo_window || ghosts[i].shortest_path_index == 0) {
+					int row, col, row_1, col_1;
+					float x = ghosts[i].sprite.getPosition().x,
+						y = ghosts[i].sprite.getPosition().y,
+						x_1 = player.getPosition().x,
+						y_1 = player.getPosition().y;
+
+					get_tile_cor(x, y, row, col);
+					get_tile_cor(x_1, y_1, row_1, col_1);
+					tile* start_pointer = &mp[1][1];
+					tile* target_pointer = &mp[13][1];
+					vector<tile> q;
+					find_optimal_path(start_pointer, target_pointer, &q);
+					ghosts[i].num_tiles_past = 0;
+					ghosts[i].shortest_path_index = q.size()-1;
+
+				}
+				else {
+					ghosts[i].num_tiles_past++;
+				}
+				
+			
+			}
+			else {
+				if (ghosts[i].moving_direction == 1) {
+					move_right(player, ghosts[i].moving_direction);
+				}
+				else if (ghosts[i].moving_direction == 2) {
+					move_left(player, ghosts[i].moving_direction);
+				}
+				else if (ghosts[i].moving_direction == 3) {
+					move_up(player, ghosts[i].moving_direction);
+				}
+				else if (ghosts[i].moving_direction == 4) {
+					move_down(player, ghosts[i].moving_direction);
+				}
+			}
+			ghosts[i].step_counts++;
+
+		}
+
+	
 
 		//find_optimal_path(start_pointer, target_pointer, &get_path);
 
@@ -517,9 +579,12 @@ void main() {
 			}
 		}
 
+		for (int i = 0; i < ghosts_number; i++) {
+			window.draw(ghosts[i].sprite);
+		}
 		window.draw(player);
-		window.draw(start_sprite);
-		window.draw(sprite_target);
+		//window.draw(start_sprite);
+		//window.draw(sprite_target);
 		window.display();
 
 	}
