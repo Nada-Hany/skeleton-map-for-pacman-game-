@@ -4,7 +4,7 @@
 #include <queue>
 #include <cmath>
 
-#define WIDTH 400
+#define WIDTH 300
 #define HEIGH 300
 #define TILESIZE 20
 #define	Y_OFFSET 0
@@ -284,17 +284,19 @@ void check_tiles(Sprite& sprite, int& keyPressed , int&lastKeyPressed , int row,
 void find_optimal_path(tile* current, tile* target, vector <tile>* get_path) {
 	queue <tile> open;
 	vector <tile> closed;
+
 	open.push(*current);
 
 	while (!open.empty()) {
 
 		current = &mp[open.front().row][open.front().column];
+		
 		open.pop();
 
 		if (current == target)
 			break;
 
-		if (current->column + 1 <= 2) {
+		if (current->column + 1 <= NUMCOL) {
 			tile* right_tile = &mp[current->row][current->column + 1];
 			if (right_tile->type != tile_type::wall)
 			{
@@ -328,7 +330,7 @@ void find_optimal_path(tile* current, tile* target, vector <tile>* get_path) {
 				}
 			}
 		}
-		if (current->row + 1 <= 2) {
+		if (current->row + 1 <= NUMROW) {
 			tile* down_tile = &mp[current->row + 1][current->column];
 
 			if (down_tile->type != tile_type::wall)
@@ -365,6 +367,7 @@ struct ghoust {
 	int num_tiles_past;
 
 }ghosts[ghosts_number];
+
 void main() {
 
 	RenderWindow window(VideoMode(WIDTH, HEIGH), "map test", Style::Default);
@@ -383,12 +386,12 @@ void main() {
 	player_texture.loadFromFile("C:/programming/cpp/BFS sfml test/pac.png");
 
 	float player_x = (2 * TILESIZE) - 10;
-	float plyaer_y = (NUMROW - 1) * TILESIZE - 10;
+	float player_y = (NUMROW - 1) * TILESIZE - 10;
 
 	Sprite player;
 	player.setOrigin((9), (9));
 	player.setTexture(player_texture);
-	player.setPosition(player_x, plyaer_y);
+	player.setPosition(player_x, player_y);
 	float px_per_frame = 0.33;
 
 	// 0 for empty space
@@ -412,8 +415,8 @@ void main() {
 
 
 	ghosts[0].sprite.setTexture(ghost_texture);
-	ghosts[0].algo_window = 7;
-	ghosts[0].num_tiles_past = 7;
+	ghosts[0].algo_window = 15;
+	ghosts[0].num_tiles_past = 15;
 	ghosts[0].speed = 2;
 	ghosts[0].frames_per_tile = TILESIZE / ghosts[0].speed;
 	ghosts[0].step_counts = 0;
@@ -518,46 +521,75 @@ void main() {
 
 		for (int i = 0; i < ghosts_number; i++) {
 
+			//col
+			if (player.getGlobalBounds().contains(ghosts[i].sprite.getPosition().x, ghosts[i].sprite.getPosition().y)) {
+				ghosts[0].algo_window = 15;
+				ghosts[0].num_tiles_past = 15;
+				ghosts[0].frames_per_tile = TILESIZE / ghosts[0].speed;
+				ghosts[0].step_counts = 0;
+				ghosts[0].sprite.setPosition(30, 30);
+				player.setPosition(player_x, player_y);
+			}
+
 			if (ghosts[i].step_counts % ghosts[i].frames_per_tile == 0 ) {
+				int row, col;
+				float x = ghosts[i].sprite.getPosition().x,
+					  y = ghosts[i].sprite.getPosition().y;
+				get_tile_cor(x, y, row, col);
+				ghosts[i].step_counts = 0;
+				if (ghosts[i].num_tiles_past == ghosts[i].algo_window || ghosts[i].shortest_path_index == -1) {
+					int row_1, col_1;
+					float x_1 = player.getPosition().x,
+					y_1 = player.getPosition().y;
 
-
-				if (ghosts[i].num_tiles_past == ghosts[i].algo_window || ghosts[i].shortest_path_index == 0) {
-					int row, col, row_1, col_1;
-					float x = ghosts[i].sprite.getPosition().x,
-						y = ghosts[i].sprite.getPosition().y,
-						x_1 = player.getPosition().x,
-						y_1 = player.getPosition().y;
-
-					get_tile_cor(x, y, row, col);
+				
 					get_tile_cor(x_1, y_1, row_1, col_1);
-					tile* start_pointer = &mp[1][1];
-					tile* target_pointer = &mp[13][1];
-					vector<tile> q;
-					find_optimal_path(start_pointer, target_pointer, &q);
+					tile* start_pointer = &mp[row][col];
+					start_pointer->parent = NULL;
+					tile* target_pointer = &mp[row_1][col_1];
+
+					find_optimal_path(start_pointer, target_pointer, &ghosts[i].shortest_path);
 					ghosts[i].num_tiles_past = 0;
-					ghosts[i].shortest_path_index = q.size()-1;
+					ghosts[i].shortest_path_index = ghosts[i].shortest_path.size()-1;
 
 				}
 				else {
 					ghosts[i].num_tiles_past++;
 				}
 				
+				tile next_tile = ghosts[i].shortest_path[ghosts[i].shortest_path_index];
+				ghosts[i].shortest_path_index--;
+				int col_diff = col - next_tile.column;
+				int row_diff = row - next_tile.row;
+				if (col_diff == 1) {
+					ghosts[i].moving_direction = 2;
+				}
+				else if (col_diff == -1) {
+					ghosts[i].moving_direction = 1;
+
+				}
+				else if (row_diff == 1) {
+					ghosts[i].moving_direction = 3;
+
+				}
+				else {
+					ghosts[i].moving_direction = 4;
+				}
+			}
 			
+			if (ghosts[i].moving_direction == 1) {
+				move_right(ghosts[i].sprite, ghosts[i].moving_direction);
 			}
-			else {
-				if (ghosts[i].moving_direction == 1) {
-					move_right(player, ghosts[i].moving_direction);
-				}
-				else if (ghosts[i].moving_direction == 2) {
-					move_left(player, ghosts[i].moving_direction);
-				}
-				else if (ghosts[i].moving_direction == 3) {
-					move_up(player, ghosts[i].moving_direction);
-				}
-				else if (ghosts[i].moving_direction == 4) {
-					move_down(player, ghosts[i].moving_direction);
-				}
+			else if (ghosts[i].moving_direction == 2) {
+				move_left(ghosts[i].sprite, ghosts[i].moving_direction);
 			}
+			else if (ghosts[i].moving_direction == 3) {
+				move_up(ghosts[i].sprite, ghosts[i].moving_direction);
+			}
+			else if (ghosts[i].moving_direction == 4) {
+				move_down(ghosts[i].sprite, ghosts[i].moving_direction);
+			}
+			
 			ghosts[i].step_counts++;
 
 		}
