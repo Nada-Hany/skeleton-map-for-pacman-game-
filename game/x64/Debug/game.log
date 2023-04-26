@@ -1,16 +1,23 @@
 ﻿  Source.cpp
-C:\programming\cpp\BFS sfml test\game\Source.cpp(52,2): warning C4091: 'typedef ': ignored on left of 'tile' when no variable is declared
-C:\programming\cpp\BFS sfml test\game\Source.cpp(111,50): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
-C:\programming\cpp\BFS sfml test\game\Source.cpp(142,52): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
-C:\programming\cpp\BFS sfml test\game\Source.cpp(172,54): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
-C:\programming\cpp\BFS sfml test\game\Source.cpp(194,54): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
-C:\programming\cpp\BFS sfml test\game\Source.cpp(371,13): warning C4326: return type of 'main' should be 'int' instead of 'void'
-C:\programming\cpp\BFS sfml test\game\Source.cpp(395,27): warning C4305: 'initializing': truncation from 'double' to 'float'
-C:\programming\cpp\BFS sfml test\game\Source.cpp(421,39): warning C4244: '=': conversion from 'float' to 'int', possible loss of data
-C:\programming\cpp\BFS sfml test\game\Source.cpp(448,101): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
-C:\programming\cpp\BFS sfml test\game\Source.cpp(448,59): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
-C:\programming\cpp\BFS sfml test\game\Source.cpp(454,57): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
-C:\programming\cpp\BFS sfml test\game\Source.cpp(454,41): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
-C:\programming\cpp\BFS sfml test\game\Source.cpp(528,42): warning C4244: '=': conversion from 'float' to 'int', possible loss of data
-C:\programming\cpp\BFS sfml test\game\Source.cpp(553,70): warning C4267: '=': conversion from 'size_t' to 'int', possible loss of data
+C:\programming\cpp\BFS sfml test\game\Source.cpp(56,2): warning C4091: 'typedef ': ignored on left of 'tile' when no variable is declared
+C:\programming\cpp\BFS sfml test\game\Source.cpp(120,50): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
+C:\programming\cpp\BFS sfml test\game\Source.cpp(151,52): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
+C:\programming\cpp\BFS sfml test\game\Source.cpp(181,54): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
+C:\programming\cpp\BFS sfml test\game\Source.cpp(203,54): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
+C:\programming\cpp\BFS sfml test\game\Source.cpp(379,51): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
+C:\programming\cpp\BFS sfml test\game\Source.cpp(388,55): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
+C:\programming\cpp\BFS sfml test\game\Source.cpp(397,49): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
+C:\programming\cpp\BFS sfml test\game\Source.cpp(407,55): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
+C:\programming\cpp\BFS sfml test\game\Source.cpp(371,27): warning C4101: 'col_2': unreferenced local variable
+C:\programming\cpp\BFS sfml test\game\Source.cpp(371,20): warning C4101: 'col_1': unreferenced local variable
+C:\programming\cpp\BFS sfml test\game\Source.cpp(371,6): warning C4101: 'row_1': unreferenced local variable
+C:\programming\cpp\BFS sfml test\game\Source.cpp(371,13): warning C4101: 'row_2': unreferenced local variable
+C:\programming\cpp\BFS sfml test\game\Source.cpp(520,13): warning C4326: return type of 'main' should be 'int' instead of 'void'
+C:\programming\cpp\BFS sfml test\game\Source.cpp(564,39): warning C4244: '=': conversion from 'float' to 'int', possible loss of data
+C:\programming\cpp\BFS sfml test\game\Source.cpp(587,76): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
+C:\programming\cpp\BFS sfml test\game\Source.cpp(587,45): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
+C:\programming\cpp\BFS sfml test\game\Source.cpp(593,57): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
+C:\programming\cpp\BFS sfml test\game\Source.cpp(593,41): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
+C:\programming\cpp\BFS sfml test\game\Source.cpp(669,42): warning C4244: '=': conversion from 'float' to 'int', possible loss of data
+C:\programming\cpp\BFS sfml test\game\Source.cpp(695,72): warning C4267: '=': conversion from 'size_t' to 'int', possible loss of data
   game.vcxproj -> C:\programming\cpp\BFS sfml test\x64\Debug\game.exe
