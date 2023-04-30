@@ -364,7 +364,7 @@ void find_optimal_path(tile* current, tile* target, vector <tile>* get_path) {
 }
 
 //random moving 
-bool check_wall (int& direction, Sprite& ghost)
+bool check_wall(int& direction, Sprite& ghost)
 {
 	bool can_move = true, condition_1 = false;
 	float x = ghost.getPosition().x, y = ghost.getPosition().y;
@@ -680,7 +680,7 @@ void main() {
 				ghosts[i].step_counts_BFS = 0;
 
 				//if the tile past equals the tiles needed to repeat the algo, or if it's first time for the algo to run.
-				if (ghosts[i].num_tiles_past_BFS == ghosts[i].algo_window_BFS ) {
+				if (ghosts[i].num_tiles_past_BFS == ghosts[i].algo_window_BFS) {
 					int row_1, col_1;
 					float x_1 = player.getPosition().x,
 						y_1 = player.getPosition().y;
@@ -701,7 +701,7 @@ void main() {
 
 				//if the ghost finished the whole path needed to catch the player last run -> move random.
 				if (ghosts[i].shortest_path_index == -1) {
-						
+
 					if (ghosts[i].step_counts_rand % ghosts[i].frames_per_tile == 0) {
 
 						ghosts[i].step_counts_rand = 0;
@@ -766,10 +766,8 @@ void main() {
 		for (int i = 0; i < ghosts_number; i++) {
 			window.draw(ghosts[i].sprite);
 		}
-
 		window.draw(player);
 		window.display();
 
 	}
 }
-
