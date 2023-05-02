@@ -14,10 +14,10 @@ C:\programming\cpp\BFS sfml test\game\Source.cpp(351,6): warning C4101: 'row_1':
 C:\programming\cpp\BFS sfml test\game\Source.cpp(351,13): warning C4101: 'row_2': unreferenced local variable
 C:\programming\cpp\BFS sfml test\game\Source.cpp(506,37): warning C4244: '=': conversion from 'float' to 'int', possible loss of data
 C:\programming\cpp\BFS sfml test\game\Source.cpp(532,63): warning C4267: '=': conversion from 'size_t' to 'int', possible loss of data
-C:\programming\cpp\BFS sfml test\game\Source.cpp(577,13): warning C4326: return type of 'main' should be 'int' instead of 'void'
-C:\programming\cpp\BFS sfml test\game\Source.cpp(621,39): warning C4244: '=': conversion from 'float' to 'int', possible loss of data
-C:\programming\cpp\BFS sfml test\game\Source.cpp(647,76): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
-C:\programming\cpp\BFS sfml test\game\Source.cpp(647,45): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
-C:\programming\cpp\BFS sfml test\game\Source.cpp(653,57): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
-C:\programming\cpp\BFS sfml test\game\Source.cpp(653,41): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
+C:\programming\cpp\BFS sfml test\game\Source.cpp(576,13): warning C4326: return type of 'main' should be 'int' instead of 'void'
+C:\programming\cpp\BFS sfml test\game\Source.cpp(620,39): warning C4244: '=': conversion from 'float' to 'int', possible loss of data
+C:\programming\cpp\BFS sfml test\game\Source.cpp(646,76): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
+C:\programming\cpp\BFS sfml test\game\Source.cpp(646,45): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
+C:\programming\cpp\BFS sfml test\game\Source.cpp(652,57): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
+C:\programming\cpp\BFS sfml test\game\Source.cpp(652,41): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
   game.vcxproj -> C:\programming\cpp\BFS sfml test\x64\Debug\game.exe

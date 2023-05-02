@@ -144,7 +144,7 @@ void move_right(Sprite& sprite, int& lastKeyPressed) {
 		}
 	}
 }
-void move_left(Sprite& sprite, int& last_keyPressed) {
+void move_left(Sprite& sprite, int& moving_direction) {
 	float y = sprite.getPosition().y, x = sprite.getPosition().x;
 	bool condition_1 = false, condition_2 = true;
 
@@ -160,7 +160,7 @@ void move_left(Sprite& sprite, int& last_keyPressed) {
 		if ((x - (player_width / 2) - diff) - ((col * TILESIZE) + TILESIZE) > 0)
 		{
 			sprite.move(-((x - (player_width / 2)) - ((col * TILESIZE) + TILESIZE)), 0);
-			last_keyPressed = 2;
+			moving_direction = 2;
 		}
 		else
 		{
@@ -171,11 +171,11 @@ void move_left(Sprite& sprite, int& last_keyPressed) {
 	else {
 		if (condition_1 && condition_2) {
 			sprite.move(-baseSpeed, 0);
-			last_keyPressed = 2;
+			moving_direction = 2;
 		}
 	}
 }
-void move_up(Sprite& sprite, int& last_keyPressed) {
+void move_up(Sprite& sprite, int& moving_direction) {
 	float y = sprite.getPosition().y, x = sprite.getPosition().x;
 	bool condition_1 = false, condition_2 = true;
 
@@ -188,16 +188,16 @@ void move_up(Sprite& sprite, int& last_keyPressed) {
 	if (mp[row][col].type == tile_type::wall) {
 		if (x, (y - (player_height / 2) - diff) - (row * TILESIZE + TILESIZE) > 0) {
 			sprite.move(0, -((y - (player_height / 2) - diff) - (row * TILESIZE + TILESIZE)));
-			last_keyPressed = 1;
+			moving_direction = 1;
 		}
 		else
 			condition_2 = false;
 	}
 	else
 		if (condition_1 && condition_2)
-			sprite.move(0, -baseSpeed), last_keyPressed = 1;
+			sprite.move(0, -baseSpeed), moving_direction = 1;
 }
-void move_down(Sprite& sprite, int& last_keyPressed) {
+void move_down(Sprite& sprite, int& moving_direction) {
 	float y = sprite.getPosition().y, x = sprite.getPosition().x;
 	bool condition_1 = false, condition_2 = true;
 
@@ -211,13 +211,13 @@ void move_down(Sprite& sprite, int& last_keyPressed) {
 		if ((row * TILESIZE) - (y + (player_height / 2) + diff) > 0)
 		{
 			sprite.move(0, (row * TILESIZE) - (y + (player_height / 2) + diff));
-			last_keyPressed = 3;
+			moving_direction = 3;
 		}
 		else
 			condition_2 = false;
 	}
 	else
-		if (condition_1 && condition_2) sprite.move(0, baseSpeed), last_keyPressed = 3;
+		if (condition_1 && condition_2) sprite.move(0, baseSpeed), moving_direction = 3;
 }
 
 
@@ -552,7 +552,6 @@ void catch_target(ghost& ghost, Sprite& target, float& initial_x, float& initial
 				ghost.shortest_path_index--;
 				int col_diff = col - next_tile.column;
 				int row_diff = row - next_tile.row;
-
 				//left
 				if (col_diff == 1) {
 					ghost.moving_direction = 2;
@@ -614,7 +613,7 @@ void main() {
 	window.setIcon(icon.getSize().x, icon.getSize().y, icon.getPixelsPtr());
 
 	int keyPressed = -1;
-	int last_keyPressed = 1;
+	int moving_direction = 1;
 
 	ghosts[0].sprite.setTexture(ghost_texture);
 	ghosts[0].speed = baseSpeed;
@@ -684,20 +683,23 @@ void main() {
 		int row, col;
 		get_tile_cor(x_player, y_player, row, col);
 
-		change_direction(player, keyPressed, last_keyPressed, row, col);
+		change_direction(player, keyPressed, moving_direction, row, col);
 
-		if (last_keyPressed == 0) {
-			move_right(player, last_keyPressed);
+		switch (moving_direction) {
+		case 0:
+			move_right(player, moving_direction);
+			break;
+		case 1:
+			move_up(player, moving_direction);
+			break;
+		case 2:
+			move_left(player, moving_direction);
+			break;
+		case 3:
+			move_down(player, moving_direction);
+			break;
 		}
-		else if (last_keyPressed == 1) {
-			move_up(player, last_keyPressed);
-		}
-		else if (last_keyPressed == 2) {
-			move_left(player, last_keyPressed);
-		}
-		else if (last_keyPressed == 3) {
-			move_down(player, last_keyPressed);
-		}
+
 
 		//Score 
 		get_tile_cor(x_player, y_player, row, col);
@@ -725,21 +727,21 @@ void main() {
 		for (int i = 0; i < ghosts_number; i++) {
 
 			catch_target(ghosts[i], player, initial_x, initial_y);
-
-			if (ghosts[i].moving_direction == 0) {
-				move_right(ghosts[i].sprite, ghosts[i].moving_direction);
-			}
-			else if (ghosts[i].moving_direction == 2) {
-				move_left(ghosts[i].sprite, ghosts[i].moving_direction);
-			}
-			else if (ghosts[i].moving_direction == 1) {
-				move_up(ghosts[i].sprite, ghosts[i].moving_direction);
-			}
-			else if (ghosts[i].moving_direction == 3) {
-				move_down(ghosts[i].sprite, ghosts[i].moving_direction);
+			switch ((ghosts[i].moving_direction)) {
+			case 0:
+				move_right(ghosts[i].sprite, (ghosts[i].moving_direction));
+				break;
+			case 1:
+				move_up(ghosts[i].sprite, (ghosts[i].moving_direction));
+				break;
+			case 2:
+				move_left(ghosts[i].sprite, (ghosts[i].moving_direction));
+				break;
+			case 3:
+				move_down(ghosts[i].sprite, (ghosts[i].moving_direction));
+				break;
 			}
 		}
-		
 
 		window.clear();
 
