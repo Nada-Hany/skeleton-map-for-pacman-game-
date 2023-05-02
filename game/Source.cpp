@@ -73,6 +73,11 @@ struct ghost {
 
 }ghosts[ghosts_number];
 
+struct target {
+	int initial_x = (2 * TILESIZE) - 10;
+	int initial_y = (NUMROW - 1) * TILESIZE - 10;
+};
+
 //function returns the row and col of the tile  
 void get_tile_cor(float x, float y, int& row, int& col) {
 	col = (int)x / TILESIZE;
@@ -215,29 +220,9 @@ void move_down(Sprite& sprite, int& last_keyPressed) {
 		if (condition_1 && condition_2) sprite.move(0, baseSpeed), last_keyPressed = 3;
 }
 
-bool can_move(Sprite& sprite, int& direction) {
-	int check = true;
-	//right
-	if (direction == 0) {
-
-	}
-	//left
-	else if (direction == 2) {
-
-	}
-	//up
-	else if (direction == 1) {
-
-	}
-	//down
-	else if (direction == 3) {
-
-	}
-	return check;
-}
 
 //movement cach 
-void check_tiles(Sprite& sprite, int& keyPressed, int& lastKeyPressed, int row, int col) {
+void change_direction(Sprite& sprite, int& keyPressed, int& lastKeyPressed, int row, int col) {
 
 	//right
 	if (keyPressed == 0) {
@@ -245,7 +230,6 @@ void check_tiles(Sprite& sprite, int& keyPressed, int& lastKeyPressed, int row, 
 		{
 			if (mp[row][col + 1].type != tile_type::wall) {
 				lastKeyPressed = keyPressed;
-				//sprite.move(baseSpeed, 0);
 			}
 		}
 	}
@@ -255,8 +239,6 @@ void check_tiles(Sprite& sprite, int& keyPressed, int& lastKeyPressed, int row, 
 		{
 			if (mp[row][col - 1].type != tile_type::wall) {
 				lastKeyPressed = keyPressed;
-				//move_left(sprite, lastKeyPressed);
-				//sprite.move(- baseSpeed, 0);
 			}
 		}
 	}
@@ -266,7 +248,6 @@ void check_tiles(Sprite& sprite, int& keyPressed, int& lastKeyPressed, int row, 
 		{
 			if (mp[row - 1][col].type != tile_type::wall) {
 				lastKeyPressed = keyPressed;
-				//move_up(sprite, lastKeyPressed);
 			}
 		}
 	}
@@ -276,7 +257,6 @@ void check_tiles(Sprite& sprite, int& keyPressed, int& lastKeyPressed, int row, 
 		{
 			if (mp[row + 1][col].type != tile_type::wall) {
 				lastKeyPressed = keyPressed;
-				//move_down(sprite, lastKeyPressed);
 			}
 		}
 	}
@@ -517,6 +497,83 @@ void random_direction(Sprite& sprite, int& direction) {
 	}
 }
 
+void catch_target(ghost& ghost, Sprite& target, float& initial_x, float& initial_y) {
+
+		//collision with the player
+		if (target.getGlobalBounds().contains(ghost.sprite.getPosition().x, ghost.sprite.getPosition().y)) {
+			ghost.algo_window_BFS = 15;
+			ghost.num_tiles_past_BFS = 15;
+			ghost.frames_per_tile = TILESIZE / ghost.speed;
+			ghost.step_counts_BFS = 0;
+			ghost.sprite.setPosition(30, 30);
+			target.setPosition(initial_x, initial_y);
+		}
+		//if the ghost finished a whole tile 
+		if (ghost.step_counts_BFS % ghost.frames_per_tile == 0) {
+			int row, col;
+			float x = ghost.sprite.getPosition().x,
+				y = ghost.sprite.getPosition().y;
+			get_tile_cor(x, y, row, col);
+			ghost.step_counts_BFS = 0;
+
+			//if the tile past equals the tiles needed to repeat the algo, or if it's first time for the algo to run.
+			if (ghost.num_tiles_past_BFS == ghost.algo_window_BFS) {
+				int row_1, col_1;
+				float x_1 = target.getPosition().x,
+					y_1 = target.getPosition().y;
+
+				get_tile_cor(x_1, y_1, row_1, col_1);
+				tile* start_pointer = &mp[row][col];
+				start_pointer->parent = NULL;
+				tile* target_pointer = &mp[row_1][col_1];
+
+				find_optimal_path(start_pointer, target_pointer, &ghost.shortest_path);
+				ghost.num_tiles_past_BFS = 0;
+				ghost.shortest_path_index = ghost.shortest_path.size() - 1;
+
+			}
+			else {
+				ghost.num_tiles_past_BFS++;
+			}
+
+			//if the ghost finished the whole path needed to catch the player last run -> move random.
+			if (ghost.shortest_path_index == -1) {
+
+				if (ghost.step_counts_rand % ghost.frames_per_tile == 0) {
+
+					ghost.step_counts_rand = 0;
+					random_direction(ghost.sprite, ghost.moving_direction);
+				}
+				ghost.step_counts_rand++;
+			}
+			else
+			{
+				tile next_tile = ghost.shortest_path[ghost.shortest_path_index];
+				ghost.shortest_path_index--;
+				int col_diff = col - next_tile.column;
+				int row_diff = row - next_tile.row;
+
+				//left
+				if (col_diff == 1) {
+					ghost.moving_direction = 2;
+				}
+				//right
+				else if (col_diff == -1) {
+					ghost.moving_direction = 0;
+				}
+				//up
+				else if (row_diff == 1) {
+					ghost.moving_direction = 1;
+				}
+				//down
+				else {
+					ghost.moving_direction = 3;
+				}
+			}
+		}
+		ghost.step_counts_BFS++;
+}
+
 void main() {
 
 	RenderWindow window(VideoMode(WIDTH, HEIGH), "map test", Style::Default);
@@ -573,6 +630,9 @@ void main() {
 
 	while (window.isOpen()) {
 
+		float initial_x = (2 * TILESIZE) - 10;
+		float initial_y = (NUMROW - 1) * TILESIZE - 10;
+
 		for (int i = 0; i < NUMROW; i++) {
 			for (int j = 0; j < NUMCOL; j++) {
 				if (walls[i][j] == -1) {
@@ -624,7 +684,7 @@ void main() {
 		int row, col;
 		get_tile_cor(x_player, y_player, row, col);
 
-		check_tiles(player, keyPressed, last_keyPressed, row, col);
+		change_direction(player, keyPressed, last_keyPressed, row, col);
 
 		if (last_keyPressed == 0) {
 			move_right(player, last_keyPressed);
@@ -648,7 +708,8 @@ void main() {
 			}
 		}
 
-		//BFS 
+		//BFS <<--
+
 		float x_start = start_sprite.getPosition().x, y_start = start_sprite.getPosition().y;
 		int row_start, col_start;
 		get_tile_cor(x_start, y_start, row_start, col_start);
@@ -660,80 +721,10 @@ void main() {
 		//step sount -> how many step/frame the ghost made.
 		//frames per tile -> how many frames/steps needed to move a whole full tile.
 		//algo window -> how many frames needed to repeat the algo.
+		
 		for (int i = 0; i < ghosts_number; i++) {
 
-			//collision with the player
-			if (player.getGlobalBounds().contains(ghosts[i].sprite.getPosition().x, ghosts[i].sprite.getPosition().y)) {
-				ghosts[0].algo_window_BFS = 15;
-				ghosts[0].num_tiles_past_BFS = 15;
-				ghosts[0].frames_per_tile = TILESIZE / ghosts[0].speed;
-				ghosts[0].step_counts_BFS = 0;
-				ghosts[0].sprite.setPosition(30, 30);
-				player.setPosition(player_x, player_y);
-			}
-			//if the ghost finished a whole tile 
-			if (ghosts[i].step_counts_BFS % ghosts[i].frames_per_tile == 0) {
-				int row, col;
-				float x = ghosts[i].sprite.getPosition().x,
-					y = ghosts[i].sprite.getPosition().y;
-				get_tile_cor(x, y, row, col);
-				ghosts[i].step_counts_BFS = 0;
-
-				//if the tile past equals the tiles needed to repeat the algo, or if it's first time for the algo to run.
-				if (ghosts[i].num_tiles_past_BFS == ghosts[i].algo_window_BFS) {
-					int row_1, col_1;
-					float x_1 = player.getPosition().x,
-						y_1 = player.getPosition().y;
-
-					get_tile_cor(x_1, y_1, row_1, col_1);
-					tile* start_pointer = &mp[row][col];
-					start_pointer->parent = NULL;
-					tile* target_pointer = &mp[row_1][col_1];
-
-					find_optimal_path(start_pointer, target_pointer, &ghosts[i].shortest_path);
-					ghosts[i].num_tiles_past_BFS = 0;
-					ghosts[i].shortest_path_index = ghosts[i].shortest_path.size() - 1;
-
-				}
-				else {
-					ghosts[i].num_tiles_past_BFS++;
-				}
-
-				//if the ghost finished the whole path needed to catch the player last run -> move random.
-				if (ghosts[i].shortest_path_index == -1) {
-
-					if (ghosts[i].step_counts_rand % ghosts[i].frames_per_tile == 0) {
-
-						ghosts[i].step_counts_rand = 0;
-						random_direction(ghosts[i].sprite, ghosts[i].moving_direction);
-					}
-					ghosts[i].step_counts_rand++;
-				}
-				else
-				{
-					tile next_tile = ghosts[i].shortest_path[ghosts[i].shortest_path_index];
-					ghosts[i].shortest_path_index--;
-					int col_diff = col - next_tile.column;
-					int row_diff = row - next_tile.row;
-
-					//left
-					if (col_diff == 1) {
-						ghosts[i].moving_direction = 2;
-					}
-					//right
-					else if (col_diff == -1) {
-						ghosts[i].moving_direction = 0;
-					}
-					//up
-					else if (row_diff == 1) {
-						ghosts[i].moving_direction = 1;
-					}
-					//down
-					else {
-						ghosts[i].moving_direction = 3;
-					}
-				}
-			}
+			catch_target(ghosts[i], player, initial_x, initial_y);
 
 			if (ghosts[i].moving_direction == 0) {
 				move_right(ghosts[i].sprite, ghosts[i].moving_direction);
@@ -747,10 +738,8 @@ void main() {
 			else if (ghosts[i].moving_direction == 3) {
 				move_down(ghosts[i].sprite, ghosts[i].moving_direction);
 			}
-
-			ghosts[i].step_counts_BFS++;
-
 		}
+		
 
 		window.clear();
 
